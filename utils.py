@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Iterable, List, Tuple
 
 
 class Vocab:
@@ -34,9 +34,12 @@ class Vocab:
         self, batch_tokens: List[List[str]], to_len: int = None
     ) -> List[List[int]]:
         batch_ids = [self.encode(tokens) for tokens in batch_tokens]
+        # FIXME: return seq_lengths
+        seq_lengths = [len(ids) for ids in batch_ids]
         to_len = max(len(ids) for ids in batch_ids) if to_len is None else to_len
         padded_ids = pad_to_len(batch_ids, to_len, self.pad_id)
-        return padded_ids
+        return padded_ids, seq_lengths
+        # return padded_ids
 
 
 def pad_to_len(seqs: List[List[int]], to_len: int, padding: int) -> List[List[int]]:
