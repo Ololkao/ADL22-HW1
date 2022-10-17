@@ -62,10 +62,10 @@ def main(args):
     df.to_csv(args.pred_file, index=False)
     # raise NotImplementedError
 
-    # uncomment this block for seqeval evaluation
-    if "tags" in data[0]:
-        answer = [line["tags"] for line in data]
-        print(classification_report(answer, submit["tags"], scheme=IOB2, mode='strict'))
+    ## uncomment this block for seqeval evaluation
+    #if "tags" in data[0]:
+    #    answer = [line["tags"] for line in data]
+    #    print(classification_report(answer, submit["tags"], scheme=IOB2, mode='strict'))
     
 
 def parse_args() -> Namespace:
