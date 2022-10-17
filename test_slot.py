@@ -13,6 +13,8 @@ from dataset import SeqTaggingClsDataset
 from model import SeqTagger
 from utils import Vocab
 
+from seqeval.metrics import classification_report
+from seqeval.scheme import IOB2
 
 def main(args):
     # TODO: implement main function
@@ -22,7 +24,7 @@ def main(args):
     slot_idx_path = args.cache_dir / "tag2idx.json"
     tag2idx: Dict[str, int] = json.loads(slot_idx_path.read_text())
 
-    data = json.loads(args.data_dir.read_text())
+    data = json.loads(args.test_file.read_text())
     dataset = SeqTaggingClsDataset(data, vocab, tag2idx, args.max_len)
     test_loader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=False, collate_fn=dataset.collate_fn)
     embeddings = torch.load(args.cache_dir / "embeddings.pt")
@@ -38,7 +40,7 @@ def main(args):
     )
     model.eval()
 
-    ckpt = torch.load(args.ckpt_dir, map_location=args.device)
+    ckpt = torch.load(args.ckpt_path, map_location=args.device)
     model = model.to(args.device)
     model.load_state_dict(ckpt)
 
@@ -60,14 +62,19 @@ def main(args):
     df.to_csv(args.pred_file, index=False)
     # raise NotImplementedError
 
+    # uncomment this block for seqeval evaluation
+    if "tags" in data[0]:
+        answer = [line["tags"] for line in data]
+        print(classification_report(answer, submit["tags"], scheme=IOB2, mode='strict'))
+    
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
     parser.add_argument(
-        "--data_dir",
+        "--test_file",
         type=Path,
-        help="Directory to the dataset.",
-        default="./data/slot/",
+        help="Path to the test file.",
+        required=True,
     )
     parser.add_argument(
         "--cache_dir",
@@ -76,10 +83,10 @@ def parse_args() -> Namespace:
         default="./cache/slot/",
     )
     parser.add_argument(
-        "--ckpt_dir",
+        "--ckpt_path",
         type=Path,
-        help="Directory to save the model file.",
-        default="./ckpt/slot/",
+        help="Path to model checkpoint.",
+        required=True,
     )
     parser.add_argument("--pred_file", type=Path, default="pred.slot.csv")
 
@@ -87,7 +94,7 @@ def parse_args() -> Namespace:
     parser.add_argument("--max_len", type=int, default=128)
 
     # model
-    parser.add_argument("--model_type", help="RNN, LSTM, GRU", default="GRU")
+    parser.add_argument("--model_type", help="RNN, LSTM, GRU", default="LSTM")
     parser.add_argument("--hidden_size", type=int, default=512)
     parser.add_argument("--num_layers", type=int, default=2)
     parser.add_argument("--dropout", type=float, default=0.1)

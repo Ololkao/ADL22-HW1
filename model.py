@@ -36,12 +36,12 @@ class SeqClassifier(torch.nn.Module):
             elif 'weight_hh' in name:
                 torch.nn.init.orthogonal_(param)
         
-        hidden_size = hidden_size * 2 if bidirectional else hidden_size
+        hidden_size = self.encoder_output_size
         self.out = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
             torch.nn.ReLU(),
-            # torch.nn.BatchNorm1d(hidden_size),
-            torch.nn.LayerNorm(hidden_size),
+            torch.nn.BatchNorm1d(hidden_size),
+            # torch.nn.LayerNorm(hidden_size),
             torch.nn.Linear(hidden_size, num_class),
         )
     @property
@@ -71,8 +71,9 @@ class SeqTagger(SeqClassifier):
         num_class: int
     ) -> None:
         super().__init__(embeddings, type, hidden_size, num_layers, dropout, bidirectional, num_class)
-        self.embed = Embedding.from_pretrained(embeddings, freeze=True)
-        hidden_size = hidden_size * 2 if bidirectional else hidden_size
+        self.embed = Embedding.from_pretrained(embeddings, freeze=False)
+
+        hidden_size = self.encoder_output_size
         self.out = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
             torch.nn.ReLU(),

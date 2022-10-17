@@ -12,7 +12,7 @@ from tqdm import tqdm, trange
 from dataset import SeqTaggingClsDataset
 from model import SeqTagger
 from utils import Vocab
-from seqeval.metrics import accuracy_score, classification_report
+from seqeval.metrics import classification_report
 
 TRAIN = "train"
 DEV = "eval"
@@ -125,7 +125,7 @@ def parse_args() -> Namespace:
     parser.add_argument("--max_len", type=int, default=128)
 
     # model
-    parser.add_argument("--model_type", help="RNN, LSTM, GRU", default="GRU")
+    parser.add_argument("--model_type", help="RNN, LSTM, GRU", default="LSTM")
     parser.add_argument("--hidden_size", type=int, default=512)
     parser.add_argument("--num_layers", type=int, default=2)
     parser.add_argument("--dropout", type=float, default=0.1)

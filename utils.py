@@ -32,7 +32,7 @@ class Vocab:
 
     def encode_batch(
         self, batch_tokens: List[List[str]], to_len: int = None
-    ) -> List[List[int]]:
+    ) -> Tuple[List[List[int]], List[int]]:
         batch_ids = [self.encode(tokens) for tokens in batch_tokens]
         # FIXME: return seq_lengths
         seq_lengths = [len(ids) for ids in batch_ids]
